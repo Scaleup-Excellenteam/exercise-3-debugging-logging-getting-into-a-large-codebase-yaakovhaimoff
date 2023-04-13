@@ -10,6 +10,10 @@ import pygame as py
 
 import ai_engine
 from enums import Player
+from logger import get_logger
+
+# Get the logger
+logger = get_logger()
 
 """Variables"""
 WIDTH = HEIGHT = 512  # width and height of the chess board
@@ -180,12 +184,15 @@ def main():
         endgame = game_state.checkmate_stalemate_checker()
         if endgame == 0:
             game_over = True
+            logger.info("Black wins.")
             draw_text(screen, "Black wins.")
         elif endgame == 1:
             game_over = True
+            logger.info("White wins.")
             draw_text(screen, "White wins.")
         elif endgame == 2:
             game_over = True
+            logger.info("Stalemate.")
             draw_text(screen, "Stalemate.")
 
         clock.tick(MAX_FPS)

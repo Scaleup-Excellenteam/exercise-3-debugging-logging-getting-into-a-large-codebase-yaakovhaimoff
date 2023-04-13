@@ -6,6 +6,10 @@
 #
 from Piece import Rook, Knight, Bishop, Queen, King, Pawn
 from enums import Player
+from logger import get_logger
+
+# Get the logger
+logger = get_logger()
 
 '''
 r \ c     0           1           2           3           4           5           6           7 
@@ -221,9 +225,11 @@ class game_state:
         all_black_moves = self.get_all_legal_moves(Player.PLAYER_2)
         if self._is_check and self.whose_turn() and not all_white_moves:
             print("white lost")
+            logger.info("white lost")
             return 0
         elif self._is_check and not self.whose_turn() and not all_black_moves:
             print("black lost")
+            logger.info("black lost")
             return 1
         elif not all_white_moves and not all_black_moves:
             return 2
@@ -854,7 +860,8 @@ class game_state:
                     # self._is_check = True
                     _checks.append((king_location_row + row_change[i], king_location_col + col_change[i]))
         # print([_checks, _pins, _pins_check])
-        return [_pins_check, _pins, _pins_check]
+        return [_checks, _pins, _pins_check]
+        # return [_pins_check, _pins, _pins_check]
 
 
 class chess_move():
