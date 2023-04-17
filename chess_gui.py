@@ -9,11 +9,9 @@ import chess_engine
 import pygame as py
 
 import ai_engine
+import logger
 from enums import Player
-from logger import get_logger
 
-# Get the logger
-logger = get_logger()
 
 """Variables"""
 WIDTH = HEIGHT = 512  # width and height of the chess board
@@ -22,6 +20,7 @@ SQ_SIZE = HEIGHT // DIMENSION  # the size of each of the squares in the board
 MAX_FPS = 15  # FPS for animations
 IMAGES = {}  # images for the chess pieces
 colors = [py.Color("white"), py.Color("gray")]
+
 
 # TODO: AI black has been worked on. Mirror progress for other two modes
 def load_images():
@@ -115,7 +114,6 @@ def main():
     py.init()
     screen = py.display.set_mode((WIDTH, HEIGHT))
     clock = py.time.Clock()
-    game_state = chess_engine.game_state()
     load_images()
     running = True
     square_selected = ()  # keeps track of the last selected square
@@ -126,8 +124,11 @@ def main():
     ai = ai_engine.chess_ai()
     game_state = chess_engine.game_state()
     if human_player is 'b':
+        logger.get_logger().info("ai white started")
         ai_move = ai.minimax_black(game_state, 3, -100000, 100000, True, Player.PLAYER_1)
         game_state.move_piece(ai_move[0], ai_move[1], True)
+    else:
+        logger.get_logger().info("human white started")
 
     while running:
         for e in py.event.get():
@@ -152,17 +153,17 @@ def main():
                             valid_moves = []
                         else:
                             game_state.move_piece((player_clicks[0][0], player_clicks[0][1]),
-                                                  (player_clicks[1][0], player_clicks[1][1]), False)
+                                                  (player_clicks[1][0], player_clicks[1][1]), False, True)
                             square_selected = ()
                             player_clicks = []
                             valid_moves = []
 
                             if human_player is 'w':
                                 ai_move = ai.minimax_white(game_state, 3, -100000, 100000, True, Player.PLAYER_2)
-                                game_state.move_piece(ai_move[0], ai_move[1], True)
+                                game_state.move_piece(ai_move[0], ai_move[1], True, True)
                             elif human_player is 'b':
                                 ai_move = ai.minimax_black(game_state, 3, -100000, 100000, True, Player.PLAYER_1)
-                                game_state.move_piece(ai_move[0], ai_move[1], True)
+                                game_state.move_piece(ai_move[0], ai_move[1], True, True)
                     else:
                         valid_moves = game_state.get_valid_moves((row, col))
                         if valid_moves is None:
@@ -171,7 +172,6 @@ def main():
                 if e.key == py.K_r:
                     game_over = False
                     game_state = chess_engine.game_state()
-                    valid_moves = []
                     square_selected = ()
                     player_clicks = []
                     valid_moves = []
@@ -184,15 +184,27 @@ def main():
         endgame = game_state.checkmate_stalemate_checker()
         if endgame == 0:
             game_over = True
-            logger.info("Black wins.")
+            logger.get_logger().info(f"black moves with no dead pieces: {logger.get_pieces_are_alive(Player.PLAYER_2)}")
+            logger.get_logger().info(f"knight moves: {logger.get_knight_moves(Player.PLAYER_2)}")
+            logger.get_logger().info(f"black check moves: {logger.get_knight_moves(Player.PLAYER_2)}")
+            logger.get_logger().info("Black wins.")
             draw_text(screen, "Black wins.")
         elif endgame == 1:
             game_over = True
-            logger.info("White wins.")
+            logger.get_logger().info(f"white moves with no dead pieces: {logger.get_pieces_are_alive(Player.PLAYER_1)}")
+            logger.get_logger().info(f"knight moves: {logger.get_knight_moves(Player.PLAYER_1)}")
+            logger.get_logger().info(f"white check moves: {logger.get_knight_moves(Player.PLAYER_1)}")
+            logger.get_logger().info("White wins.")
             draw_text(screen, "White wins.")
         elif endgame == 2:
             game_over = True
-            logger.info("Stalemate.")
+            logger.get_logger().info(f"white moves with no dead pieces: {logger.get_pieces_are_alive(Player.PLAYER_1)}")
+            logger.get_logger().info(f"black moves with no dead pieces: {logger.get_pieces_are_alive(Player.PLAYER_2)}")
+            logger.get_logger().info(f"white knight moves: {logger.get_knight_moves(Player.PLAYER_1)}")
+            logger.get_logger().info(f"black knight moves: {logger.get_knight_moves(Player.PLAYER_2)}")
+            logger.get_logger().info(f"white check moves: {logger.get_knight_moves(Player.PLAYER_1)}")
+            logger.get_logger().info(f"black check moves: {logger.get_knight_moves(Player.PLAYER_2)}")
+            logger.get_logger().info("Stalemate.")
             draw_text(screen, "Stalemate.")
 
         clock.tick(MAX_FPS)
